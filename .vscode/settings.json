@@ -1,0 +1,9 @@
+{
+    "codeDigest.ignore": [
+        "src/**",
+        ".vscode/**",
+        ".gitignore",
+        ".vscode"
+    ],
+    "codeDigest.explicitIncludes": []
+}
