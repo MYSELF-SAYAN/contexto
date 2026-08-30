@@ -8,3 +8,12 @@ esbuild.js
 **/*.ts
 **/*.map
 *.vsix
+media/icons/**
+dist/test/**
+dist/commands/**
+dist/core/**
+dist/generators/**
+dist/models/**
+dist/ui/**
+dist/utils/**
+dist/*.d.ts

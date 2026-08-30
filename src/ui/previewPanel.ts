@@ -46,8 +46,8 @@ export class PreviewPanel {
       this.panel.reveal(vscode.ViewColumn.Beside, true);
     } else {
       this.panel = vscode.window.createWebviewPanel(
-        'codeDigestPreview',
-        'CodeDigest Preview',
+        'contextoPreview',
+        'Contexto Preview',
         { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
         {
           enableScripts: true,
@@ -55,6 +55,8 @@ export class PreviewPanel {
           localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, 'media')],
         }
       );
+
+      this.panel.iconPath = vscode.Uri.joinPath(this.extensionUri, 'media', 'icon.png');
 
       this.panel.onDidDispose(() => {
         this.panel = undefined;
@@ -116,7 +118,7 @@ export class PreviewPanel {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
-  <title>CodeDigest Preview</title>
+  <title>Contexto Preview</title>
   <style nonce="${nonce}">
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -269,7 +271,7 @@ export class PreviewPanel {
   </div>
 
   <div class="content" id="content">
-    <div class="empty-state">Select files in CodeDigest to see the live preview.</div>
+    <div class="empty-state">Select files in Contexto to see the live preview.</div>
   </div>
 
   <div class="stats-bar" id="statsBar">
@@ -331,7 +333,7 @@ export class PreviewPanel {
         const contentEl = document.getElementById('content');
         const text = contents[currentFormat] || '';
         if (!text) {
-          contentEl.innerHTML = '<div class="empty-state">Select files in CodeDigest to see the live preview.</div>';
+          contentEl.innerHTML = '<div class="empty-state">Select files in Contexto to see the live preview.</div>';
           return;
         }
         const pre = document.createElement('pre');

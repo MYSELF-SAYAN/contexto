@@ -39,23 +39,46 @@ export const DEFAULT_IGNORE_PATTERNS: string[] = [
  * Manages the multi-layered ignore system.
  *
  * Precedence (highest to lowest):
- *   1. Direct Explicit Include (unignored file/folder)
- *   2. User Ignore (manually ignored by user)
- *   3. Folder Explicit Include (unignored parent folder)
- *   4. .contextignore
- *   5. .gitignore
- *   6. Default Ignore
+ *   1. Direct Explicit Include (unignored file/folder)  — exact path set
+ *   2. User Ignore (manually ignored by user)           — exact path set + ignore-lib globs
+ *   3. Folder Explicit Include (unignored parent folder) — prefix set
+ *   4. .contextignore                                    — ignore-lib
+ *   5. .gitignore                                        — ignore-lib
+ *   6. Default Ignore                                    — ignore-lib
+ *
+ * User ignore patterns are matched TWO ways:
+ *   - As exact paths (stored in _userExactPaths)
+ *   - As glob patterns via the `ignore` library (stored in _userIgnore)
+ * This guarantees that both "src/foo.ts" (exact) and "*.log" (glob) work correctly.
  */
 export class IgnoreEngine {
   private defaultIgnore: Ignore;
   private gitignore: Ignore | null = null;
   private contextignore: Ignore | null = null;
-  private userIgnore: Ignore;
 
-  /** Direct exact paths that override all ignore layers */
-  private explicitIncludes: Set<string> = new Set();
+  /**
+   * Glob-based user ignore (for patterns like *.log, src/**)
+   */
+  private _userIgnore: Ignore;
+
+  /**
+   * Exact user-ignored paths — NOT run through the glob engine.
+   * This is the primary fix: ignoring "src/foo.ts" should match exactly,
+   * not be subject to glob interpretation quirks.
+   */
+  private _userExactPaths: Set<string> = new Set();
+
+  /**
+   * Exact user-ignored folder paths + their "/**" globs.
+   * When a folder is ignored, both the folder path and folder/** are stored.
+   */
+  private _userExactFolders: Set<string> = new Set();
+
+  /** Direct exact paths that override ALL ignore layers */
+  private _explicitIncludes: Set<string> = new Set();
+
   /** Folder prefixes whose descendants are unignored (unless overridden by a user ignore) */
-  private explicitIncludeFolders: Set<string> = new Set();
+  private _explicitIncludeFolders: Set<string> = new Set();
 
   private gitignoreLoaded = false;
   private contextignoreLoaded = false;
@@ -64,7 +87,7 @@ export class IgnoreEngine {
 
   constructor() {
     this.defaultIgnore = ignore().add(DEFAULT_IGNORE_PATTERNS);
-    this.userIgnore = ignore();
+    this._userIgnore = ignore();
   }
 
   /**
@@ -121,29 +144,73 @@ export class IgnoreEngine {
   }
 
   /**
+   * Returns true if a pattern looks like a glob (contains *, ?, !, [, {).
+   * Exact paths are handled via Set lookups for robustness.
+   */
+  private static isGlobPattern(pattern: string): boolean {
+    return /[*?!\[{]/.test(pattern);
+  }
+
+  /**
    * Loads user-defined ignore patterns from settings.
+   *
+   * Patterns are split into two buckets:
+   * - Exact paths → stored in _userExactPaths / _userExactFolders for Set-based lookups
+   * - Glob patterns → passed to the `ignore` library
+   *
+   * This dual approach prevents the `ignore` library from misinterpreting
+   * exact paths (e.g. "src/foo.ts" being treated as a glob).
    */
   loadUserIgnores(patterns: string[]): void {
-    this.userIgnore = ignore();
+    this._userIgnore = ignore();
+    this._userExactPaths = new Set();
+    this._userExactFolders = new Set();
     this._userPatterns = [...patterns];
-    if (patterns.length > 0) {
-      this.userIgnore.add(patterns);
+
+    const globPatterns: string[] = [];
+
+    for (const raw of patterns) {
+      const p = raw.trim();
+      if (!p || p.startsWith('#')) {
+        continue; // skip empty / comment lines
+      }
+
+      if (p.endsWith('/**')) {
+        // Folder ignore: "src/**" → exact folder "src"
+        const folder = p.slice(0, -3);
+        this._userExactFolders.add(folder);
+        this._userExactPaths.add(folder);
+        this._userExactPaths.add(p);
+      } else if (IgnoreEngine.isGlobPattern(p)) {
+        globPatterns.push(p);
+      } else {
+        // Exact path (could be file or folder)
+        this._userExactPaths.add(p);
+      }
+    }
+
+    if (globPatterns.length > 0) {
+      this._userIgnore.add(globPatterns);
     }
   }
 
   /**
    * Loads explicit includes from settings.
+   * Distinguishes between file includes and folder includes.
    */
   loadExplicitIncludes(includes: string[]): void {
-    this.explicitIncludes = new Set();
-    this.explicitIncludeFolders = new Set();
+    this._explicitIncludes = new Set();
+    this._explicitIncludeFolders = new Set();
     for (const inc of includes) {
-      this.explicitIncludes.add(inc);
-      if (inc.endsWith('/**')) {
-        this.explicitIncludeFolders.add(inc.slice(0, -3));
-      } else {
-        this.explicitIncludeFolders.add(inc);
+      const trimmed = inc.trim();
+      if (!trimmed) { continue; }
+      this._explicitIncludes.add(trimmed);
+      if (trimmed.endsWith('/**')) {
+        // "src/**" → folder prefix "src"
+        this._explicitIncludeFolders.add(trimmed.slice(0, -3));
       }
+      // NOTE: we do NOT add non-glob paths to _explicitIncludeFolders.
+      // Only folder globs (ending with /**) create folder-prefix overrides.
     }
   }
 
@@ -152,11 +219,11 @@ export class IgnoreEngine {
    */
   setExplicitIncludes(includes: string[]): void {
     for (const inc of includes) {
-      this.explicitIncludes.add(inc);
-      if (inc.endsWith('/**')) {
-        this.explicitIncludeFolders.add(inc.slice(0, -3));
-      } else {
-        this.explicitIncludeFolders.add(inc);
+      const trimmed = inc.trim();
+      if (!trimmed) { continue; }
+      this._explicitIncludes.add(trimmed);
+      if (trimmed.endsWith('/**')) {
+        this._explicitIncludeFolders.add(trimmed.slice(0, -3));
       }
     }
   }
@@ -165,11 +232,9 @@ export class IgnoreEngine {
    * Adds a single explicit include.
    */
   addExplicitInclude(relativePath: string): void {
-    this.explicitIncludes.add(relativePath);
+    this._explicitIncludes.add(relativePath);
     if (relativePath.endsWith('/**')) {
-      this.explicitIncludeFolders.add(relativePath.slice(0, -3));
-    } else {
-      this.explicitIncludeFolders.add(relativePath);
+      this._explicitIncludeFolders.add(relativePath.slice(0, -3));
     }
   }
 
@@ -177,11 +242,12 @@ export class IgnoreEngine {
    * Removes a single explicit include.
    */
   removeExplicitInclude(relativePath: string): void {
-    this.explicitIncludes.delete(relativePath);
-    this.explicitIncludes.delete(relativePath + '/**');
-    this.explicitIncludeFolders.delete(relativePath);
+    this._explicitIncludes.delete(relativePath);
+    this._explicitIncludes.delete(relativePath + '/**');
     if (relativePath.endsWith('/**')) {
-      this.explicitIncludeFolders.delete(relativePath.slice(0, -3));
+      this._explicitIncludeFolders.delete(relativePath.slice(0, -3));
+    } else {
+      this._explicitIncludeFolders.delete(relativePath);
     }
   }
 
@@ -189,7 +255,7 @@ export class IgnoreEngine {
    * Returns the current explicit includes as an array.
    */
   getExplicitIncludes(): string[] {
-    return Array.from(this.explicitIncludes);
+    return Array.from(this._explicitIncludes);
   }
 
   /**
@@ -200,13 +266,13 @@ export class IgnoreEngine {
   }
 
   /**
-   * Checks if a path is directly explicitly included.
+   * Checks if a path is directly explicitly included (exact match).
    */
   private isDirectlyExplicitlyIncluded(relativePath: string): boolean {
     return (
-      this.explicitIncludes.has(relativePath) ||
-      this.explicitIncludes.has(relativePath + '/**') ||
-      this.explicitIncludes.has(relativePath + '/')
+      this._explicitIncludes.has(relativePath) ||
+      this._explicitIncludes.has(relativePath + '/**') ||
+      this._explicitIncludes.has(relativePath + '/')
     );
   }
 
@@ -214,11 +280,39 @@ export class IgnoreEngine {
    * Checks if a path's parent folder is explicitly included.
    */
   private isFolderExplicitlyIncluded(relativePath: string): boolean {
-    for (const folder of this.explicitIncludeFolders) {
+    for (const folder of this._explicitIncludeFolders) {
       if (relativePath === folder || relativePath.startsWith(folder + '/')) {
         return true;
       }
     }
+    return false;
+  }
+
+  /**
+   * Checks if a path is user-ignored via exact path match or glob match.
+   */
+  private isUserIgnored(relativePath: string): boolean {
+    // 1. Exact path match
+    if (this._userExactPaths.has(relativePath)) {
+      return true;
+    }
+
+    // 2. Check if any user-ignored folder is a parent
+    for (const folder of this._userExactFolders) {
+      if (relativePath.startsWith(folder + '/')) {
+        return true;
+      }
+    }
+
+    // 3. Glob pattern match via `ignore` library
+    try {
+      if (this._userIgnore.ignores(relativePath)) {
+        return true;
+      }
+    } catch {
+      // Invalid pattern — skip
+    }
+
     return false;
   }
 
@@ -232,13 +326,9 @@ export class IgnoreEngine {
       return { ignored: false };
     }
 
-    // 2. User ignore patterns (explicitly ignored by user clicking eye-closed)
-    try {
-      if (this.userIgnore.ignores(relativePath)) {
-        return { ignored: true, source: IgnoreSource.User };
-      }
-    } catch {
-      // Invalid pattern — skip
+    // 2. User ignore patterns (explicitly ignored by user clicking eye)
+    if (this.isUserIgnored(relativePath)) {
+      return { ignored: true, source: IgnoreSource.User };
     }
 
     // 3. Inherited folder explicit include
@@ -291,9 +381,19 @@ export class IgnoreEngine {
       return { ignored: false };
     }
 
-    // 2. User ignore
+    // 2. User ignore — exact path or folder set or glob
+    if (this._userExactPaths.has(cleanPath) || this._userExactFolders.has(cleanPath)) {
+      return { ignored: true, source: IgnoreSource.User };
+    }
+    // Check if a parent folder is user-ignored
+    for (const folder of this._userExactFolders) {
+      if (cleanPath.startsWith(folder + '/')) {
+        return { ignored: true, source: IgnoreSource.User };
+      }
+    }
+    // Check glob patterns
     try {
-      if (this.userIgnore.ignores(cleanPath) || this.userIgnore.ignores(cleanPath + '/')) {
+      if (this._userIgnore.ignores(cleanPath) || this._userIgnore.ignores(cleanPath + '/')) {
         return { ignored: true, source: IgnoreSource.User };
       }
     } catch {

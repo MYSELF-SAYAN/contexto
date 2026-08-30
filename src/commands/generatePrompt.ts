@@ -103,7 +103,7 @@ export function generatePrompt(contextManager: ContextManager, extensionUri: vsc
           };
 
           preview.onRefresh = () => {
-            vscode.commands.executeCommand('codeDigest.generatePrompt');
+            vscode.commands.executeCommand('contexto.generatePrompt');
           };
 
           preview.onFormatChange = (format: string) => {
@@ -120,7 +120,7 @@ export function generatePrompt(contextManager: ContextManager, extensionUri: vsc
           );
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          vscode.window.showErrorMessage(`CodeDigest: Failed to generate prompt — ${message}`);
+          vscode.window.showErrorMessage(`Contexto: Failed to generate prompt — ${message}`);
         }
       }
     );

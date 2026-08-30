@@ -114,4 +114,30 @@ suite('IgnoreEngine', () => {
     assert.ok(DEFAULT_IGNORE_PATTERNS.includes('dist'));
     assert.ok(DEFAULT_IGNORE_PATTERNS.includes('coverage'));
   });
+
+  test('should correctly remove explicit includes', () => {
+    const engine = new IgnoreEngine();
+    engine.addExplicitInclude('node_modules/my-pkg');
+    assert.ok(!engine.isIgnored('node_modules/my-pkg').ignored);
+
+    engine.removeExplicitInclude('node_modules/my-pkg');
+    assert.ok(engine.isIgnored('node_modules/my-pkg').ignored);
+  });
+
+  test('should correctly describe ignore sources', () => {
+    const engine = new IgnoreEngine();
+    engine.loadUserIgnores(['custom.txt']);
+
+    assert.strictEqual(engine.getIgnoreDescription('node_modules/pkg/file.js'), 'default');
+    assert.strictEqual(engine.getIgnoreDescription('custom.txt'), 'ignored');
+    assert.strictEqual(engine.getIgnoreDescription('src/index.ts'), 'not ignored');
+  });
+
+  test('should handle directory ignore check with user ignore glob', () => {
+    const engine = new IgnoreEngine();
+    engine.loadUserIgnores(['temp', 'temp/**']);
+
+    assert.ok(engine.isDirectoryIgnored('temp').ignored);
+    assert.ok(engine.isIgnored('temp/file.txt').ignored);
+  });
 });

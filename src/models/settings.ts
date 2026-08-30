@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { OutputFormat } from './context.js';
 
 /**
- * Typed representation of all codeDigest.* settings.
+ * Typed representation of all contexto.* settings.
  */
 export interface ExtensionSettings {
   respectGitignore: boolean;
@@ -21,7 +21,7 @@ export interface ExtensionSettings {
  * Reads current extension settings from VS Code configuration.
  */
 export function getSettings(): ExtensionSettings {
-  const config = vscode.workspace.getConfiguration('codeDigest');
+  const config = vscode.workspace.getConfiguration('contexto');
 
   const formatStr = config.get<string>('defaultFormat', 'xml');
   let defaultFormat: OutputFormat;

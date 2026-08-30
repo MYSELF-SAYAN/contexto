@@ -67,7 +67,7 @@ export function copyStructure(contextManager: ContextManager) {
       await copyToClipboard(formatted, 'Directory structure copied to clipboard.');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy structure — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy structure — ${message}`);
     }
   };
 }
@@ -101,7 +101,7 @@ export function copyFolderStructure(contextManager: ContextManager) {
       await copyToClipboard(formatted, 'Folder structure copied to clipboard.');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy folder structure — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy folder structure — ${message}`);
     }
   };
 }
@@ -129,7 +129,7 @@ export function copyWorkspaceStructure(contextManager: ContextManager) {
       await copyToClipboard(formatted, 'Workspace structure copied to clipboard.');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy workspace structure — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy workspace structure — ${message}`);
     }
   };
 }
@@ -179,7 +179,7 @@ export function copyPrompt(contextManager: ContextManager) {
           await copyToClipboard(content, `Context copied as ${label} (${readResult.files.length} files).`);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          vscode.window.showErrorMessage(`CodeDigest: Failed to copy prompt — ${message}`);
+          vscode.window.showErrorMessage(`Contexto: Failed to copy prompt — ${message}`);
         }
       }
     );
@@ -219,7 +219,7 @@ export function copyPromptAs(contextManager: ContextManager) {
 
     const picked = await vscode.window.showQuickPick(items, {
       placeHolder: 'Select output format to copy',
-      title: 'CodeDigest: Copy Prompt As...',
+      title: 'Contexto: Copy Prompt As...',
     });
 
     if (!picked) { return; }
@@ -268,7 +268,7 @@ export function copyPromptAs(contextManager: ContextManager) {
           await copyToClipboard(content, `Context copied as ${formatLabel(format)} (${readResult.files.length} files).`);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          vscode.window.showErrorMessage(`CodeDigest: Failed to copy prompt — ${message}`);
+          vscode.window.showErrorMessage(`Contexto: Failed to copy prompt — ${message}`);
         }
       }
     );
@@ -292,7 +292,7 @@ export function copyPaths(contextManager: ContextManager) {
       await copyToClipboard(text, `${paths.length} path(s) copied to clipboard.`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy paths — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy paths — ${message}`);
     }
   };
 }
@@ -326,7 +326,7 @@ export function copyFolderPaths(contextManager: ContextManager) {
       await copyToClipboard(text, `${paths.length} path(s) copied to clipboard.`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy folder paths — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy folder paths — ${message}`);
     }
   };
 }
@@ -358,7 +358,7 @@ export function copyContext(contextManager: ContextManager) {
       await copyToClipboard(content, `Context copied as ${formatLabel(format)}.`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy context — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy context — ${message}`);
     }
   };
 }
@@ -412,7 +412,7 @@ export function copyFolderContext(contextManager: ContextManager) {
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      vscode.window.showErrorMessage(`CodeDigest: Failed to copy folder context — ${message}`);
+      vscode.window.showErrorMessage(`Contexto: Failed to copy folder context — ${message}`);
     }
   };
 }

@@ -4,8 +4,8 @@ import { formatStatsShort } from '../core/tokenCounter.js';
 
 /**
  * Manages the status bar item.
- * Shows: $(file-code) CodeDigest: 8 files · ~4.9k tokens
- * Click opens the CodeDigest sidebar.
+ * Shows: $(file-code) Contexto: 8 files · ~4.9k tokens
+ * Click opens the Contexto sidebar.
  */
 export class StatusBar {
   private item: vscode.StatusBarItem;
@@ -17,8 +17,8 @@ export class StatusBar {
       vscode.StatusBarAlignment.Left,
       50
     );
-    this.item.command = 'codeDigest.open';
-    this.item.tooltip = 'Open CodeDigest';
+    this.item.command = 'contexto.open';
+    this.item.tooltip = 'Open Contexto';
 
     // Update on context changes
     contextManager.onDidChange(() => {
@@ -34,17 +34,17 @@ export class StatusBar {
    */
   async update(): Promise<void> {
     if (this.contextManager.isEmpty()) {
-      this.item.text = '$(file-code) CodeDigest: empty';
+      this.item.text = '$(file-code) Contexto: empty';
       this.item.show();
       return;
     }
 
     try {
       const summary = await this.contextManager.getQuickSummary();
-      this.item.text = `$(file-code) CodeDigest: ${formatStatsShort(summary.included, summary.estimatedTokens)}`;
+      this.item.text = `$(file-code) Contexto: ${formatStatsShort(summary.included, summary.estimatedTokens)}`;
     } catch {
       const count = this.contextManager.getFileCount();
-      this.item.text = `$(file-code) CodeDigest: ${count} item${count !== 1 ? 's' : ''}`;
+      this.item.text = `$(file-code) Contexto: ${count} item${count !== 1 ? 's' : ''}`;
     }
 
     this.item.show();

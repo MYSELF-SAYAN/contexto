@@ -23,8 +23,12 @@ export class ContextManager {
   private workspaceRoot: string;
   private fileWatcher: vscode.FileSystemWatcher | undefined;
 
-  /** Guard to prevent re-entrant reloads when we persist settings */
-  private _suppressConfigReload = false;
+  /**
+   * Guard to prevent re-entrant reloads when we persist settings.
+   * Incremented before writing, decremented after the config change event fires.
+   * Using a counter (not a boolean) to handle overlapping writes safely.
+   */
+  private _suppressConfigReloadCount = 0;
 
   private readonly _onDidChange = new vscode.EventEmitter<void>();
   readonly onDidChange = this._onDidChange.event;
@@ -48,7 +52,24 @@ export class ContextManager {
    * Whether config reload should be suppressed (we just wrote settings ourselves).
    */
   get suppressConfigReload(): boolean {
-    return this._suppressConfigReload;
+    return this._suppressConfigReloadCount > 0;
+  }
+
+  /**
+   * Enters the "suppress config reload" zone. Must be paired with exitSuppressZone().
+   */
+  enterSuppressZone(): void {
+    this._suppressConfigReloadCount++;
+  }
+
+  /**
+   * Leaves the "suppress config reload" zone after a short delay
+   * so the configuration change event has time to fire first.
+   */
+  exitSuppressZone(): void {
+    setTimeout(() => {
+      this._suppressConfigReloadCount = Math.max(0, this._suppressConfigReloadCount - 1);
+    }, 200);
   }
 
   /**
@@ -68,9 +89,9 @@ export class ContextManager {
    */
   async reloadIgnoreEngine(): Promise<void> {
     this.ignoreEngine = new IgnoreEngine();
+    const settings = getSettings();
+    this._explicitIncludes = new Set(settings.explicitIncludes.map(normalizePath));
     await this.ignoreEngine.loadForWorkspace(this.workspaceRoot);
-    // Sync in-memory explicit includes to the new engine
-    this.ignoreEngine.setExplicitIncludes(Array.from(this._explicitIncludes));
     this._onDidChange.fire();
   }
 
@@ -251,35 +272,54 @@ export class ContextManager {
 
   /**
    * Removes an explicit include for a path.
-   * For folders, also removes "path/**".
+   * For folders, also removes all child explicit includes.
    * Persists to workspace settings.
    */
   async removeExplicitInclude(relativePath: string): Promise<void> {
     const normalized = normalizePath(relativePath);
-    this._explicitIncludes.delete(normalized);
-    this._explicitIncludes.delete(normalized + '/**');
-    this.ignoreEngine.removeExplicitInclude(normalized);
-    this.ignoreEngine.removeExplicitInclude(normalized + '/**');
+    const toDelete: string[] = [];
+    for (const inc of this._explicitIncludes) {
+      if (inc === normalized || inc === normalized + '/**' || inc.startsWith(normalized + '/')) {
+        toDelete.push(inc);
+      }
+    }
+    for (const inc of toDelete) {
+      this._explicitIncludes.delete(inc);
+      this.ignoreEngine.removeExplicitInclude(inc);
+    }
     await this.persistExplicitIncludes();
   }
 
   /**
    * Persists the current explicit includes to workspace settings.
-   * Sets suppressConfigReload to avoid re-entrant reload.
+   * Uses suppress zone to avoid re-entrant reload.
    */
   private async persistExplicitIncludes(): Promise<void> {
     try {
-      this._suppressConfigReload = true;
-      const config = vscode.workspace.getConfiguration('codeDigest');
+      this.enterSuppressZone();
+      const config = vscode.workspace.getConfiguration('contexto');
       const includes = Array.from(this._explicitIncludes);
       await config.update('explicitIncludes', includes, vscode.ConfigurationTarget.Workspace);
     } catch {
       // Settings write failed — non-critical, ignore silently
     } finally {
-      // Small delay to let the config change event fire first
-      setTimeout(() => {
-        this._suppressConfigReload = false;
-      }, 100);
+      this.exitSuppressZone();
+    }
+  }
+
+  /**
+   * Updates the user ignore list in workspace settings.
+   * Uses suppress zone to avoid re-entrant reload.
+   */
+  async updateUserIgnoreSettings(patterns: string[]): Promise<void> {
+    try {
+      this.enterSuppressZone();
+      const config = vscode.workspace.getConfiguration('contexto');
+      await config.update('ignore', patterns, vscode.ConfigurationTarget.Workspace);
+    } catch {
+      // Settings write failed — non-critical
+    } finally {
+      this.exitSuppressZone();
     }
   }
 

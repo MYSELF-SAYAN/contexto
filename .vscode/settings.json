@@ -5,5 +5,17 @@
         ".gitignore",
         ".vscode"
     ],
-    "codeDigest.explicitIncludes": []
+    "codeDigest.explicitIncludes": [],
+    "contexto.ignore": [
+        "media",
+        "media/**",
+        "contexto-1.1.2.vsix"
+    ],
+    "contexto.explicitIncludes": [
+        "dist",
+        "dist/**",
+        ".vscode-test",
+        ".vscode-test/**",
+        "CHANGELOG.md"
+    ]
 }

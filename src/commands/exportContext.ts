@@ -91,7 +91,7 @@ export function exportContext(contextManager: ContextManager) {
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          vscode.window.showErrorMessage(`CodeDigest: Failed to export — ${message}`);
+          vscode.window.showErrorMessage(`Contexto: Failed to export — ${message}`);
         }
       }
     );

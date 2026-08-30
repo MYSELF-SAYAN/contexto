@@ -5,6 +5,7 @@ import { ContextManager } from '../core/contextManager.js';
 import { IgnoreEngine } from '../core/ignoreEngine.js';
 import { normalizePath, toRelativePath } from '../utils/paths.js';
 import { isBinaryFile, isSensitiveFile } from '../utils/fileUtils.js';
+import { unignorePath } from '../commands/removeFromIgnore.js';
 
 /**
  * Tree item representing a workspace file or folder with a checkbox.
@@ -43,7 +44,7 @@ export class WorkspaceTreeItem extends vscode.TreeItem {
  * - Folders expand/collapse natively
  * - Checkboxes allow immediate selection / manipulation
  * - Ignored files/folders remain visible with detailed ignore source label and unignore action
- * - Checking an ignored item explicitly includes it (persisted)
+ * - Selecting an ignored item prompts the user that it must be unignored first
  */
 export class ContextTreeProvider implements vscode.TreeDataProvider<WorkspaceTreeItem> {
   private _onDidChangeTreeData = new vscode.EventEmitter<WorkspaceTreeItem | undefined>();
@@ -124,7 +125,7 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<WorkspaceTre
       if (ignoreResult.ignored) {
         const sourceLabel = this.ignoreEngine.getIgnoreDescription(relPath);
         item.description = `ignored (${sourceLabel})`;
-        item.tooltip = `${relPath}\nIgnored by: ${sourceLabel}\nClick eye button or check box to unignore`;
+        item.tooltip = `${relPath}\nIgnored by: ${sourceLabel}\nClick eye-closed button to unignore`;
         item.contextValue = isDir ? 'contextIgnoredFolder' : 'contextIgnoredFile';
       } else {
         item.contextValue = isDir ? 'contextFolder' : 'contextFile';
@@ -145,7 +146,7 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<WorkspaceTre
 
   /**
    * Handles user toggling checkbox on files or folders in the tree view.
-   * When checking an ignored item, persists the explicit include.
+   * If checking an ignored item, blocks selection and prompts user to unignore first.
    */
   async handleCheckboxChange(
     items: ReadonlyArray<[WorkspaceTreeItem, vscode.TreeItemCheckboxState]>
@@ -153,23 +154,50 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<WorkspaceTre
     for (const [item, state] of items) {
       const checked = state === vscode.TreeItemCheckboxState.Checked;
 
-      if (item.isDirectory) {
-        if (checked) {
-          if (item.isIgnored) {
-            await this.contextManager.addExplicitInclude(item.relativePath, true);
+      if (checked) {
+        const isIgnored = item.isDirectory
+          ? this.ignoreEngine.isDirectoryIgnored(item.relativePath).ignored
+          : this.ignoreEngine.isIgnored(item.relativePath).ignored;
+
+        if (isIgnored) {
+          // Immediately reset checkbox back to Unchecked
+          this._onDidChangeTreeData.fire(undefined);
+
+          const choice = await vscode.window.showWarningMessage(
+            `"${item.relativePath}" is ignored. To select this, you need to unignore it first.`,
+            'Unignore & Select',
+            'Unignore'
+          );
+
+          if (choice === 'Unignore & Select') {
+            await unignorePath(this.contextManager, item.relativePath, item.isDirectory);
+            if (item.isDirectory) {
+              this.contextManager.addFolder(item.relativePath);
+              await this.checkFolderRecursively(item.absolutePath);
+            } else {
+              this.contextManager.addFile(item.relativePath);
+            }
+          } else if (choice === 'Unignore') {
+            await unignorePath(this.contextManager, item.relativePath, item.isDirectory);
+            vscode.window.showInformationMessage(
+              item.isDirectory
+                ? `Contexto: Unignored folder "${item.relativePath}" and its contents`
+                : `Contexto: Unignored "${item.relativePath}"`
+            );
           }
+          continue;
+        }
+
+        if (item.isDirectory) {
           this.contextManager.addFolder(item.relativePath);
           await this.checkFolderRecursively(item.absolutePath);
         } else {
-          this.contextManager.removeFolder(item.relativePath);
-          this.contextManager.removeFilesUnderFolder(item.relativePath);
+          this.contextManager.addFile(item.relativePath);
         }
       } else {
-        if (checked) {
-          if (item.isIgnored) {
-            await this.contextManager.addExplicitInclude(item.relativePath, false);
-          }
-          this.contextManager.addFile(item.relativePath);
+        if (item.isDirectory) {
+          this.contextManager.removeFolder(item.relativePath);
+          this.contextManager.removeFilesUnderFolder(item.relativePath);
         } else {
           this.contextManager.removeFile(item.relativePath);
         }
@@ -184,13 +212,13 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<WorkspaceTre
     const entries = await scanner.scanDirectory(
       folderAbsPath,
       this.workspaceRoot,
-      this.ignoreEngine,
+      this.contextManager.getIgnoreEngine(),
       { maxFileSize: settings.maxFileSize }
     );
 
     const flatFiles = scanner.flattenFiles(entries);
     const paths = flatFiles
-      .filter(e => !e.isBinary)
+      .filter(e => !e.isBinary && e.included)
       .map(e => e.relativePath);
 
     this.contextManager.addFileBatch(paths);

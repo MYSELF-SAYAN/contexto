@@ -37,32 +37,32 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   if (!workspaceFolder) {
     // Register a subset of commands that show a warning
     const noWorkspace = () => {
-      vscode.window.showWarningMessage('CodeDigest requires an open workspace.');
+      vscode.window.showWarningMessage('Contexto requires an open workspace.');
     };
     context.subscriptions.push(
-      vscode.commands.registerCommand('codeDigest.open', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.addFile', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.addFolder', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.addActiveFile', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.addOpenEditors', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.addWorkspace', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.generatePrompt', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyStructure', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyPrompt', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyPromptAs', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyPaths', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.clearContext', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.exportContext', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.removeFile', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.ignoreFile', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.ignoreFolder', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.removeFromIgnore', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyFolderStructure', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyWorkspaceStructure', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyFolderPaths', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyContext', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.copyFolderContext', noWorkspace),
-      vscode.commands.registerCommand('codeDigest.refreshContext', noWorkspace),
+      vscode.commands.registerCommand('contexto.open', noWorkspace),
+      vscode.commands.registerCommand('contexto.addFile', noWorkspace),
+      vscode.commands.registerCommand('contexto.addFolder', noWorkspace),
+      vscode.commands.registerCommand('contexto.addActiveFile', noWorkspace),
+      vscode.commands.registerCommand('contexto.addOpenEditors', noWorkspace),
+      vscode.commands.registerCommand('contexto.addWorkspace', noWorkspace),
+      vscode.commands.registerCommand('contexto.generatePrompt', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyStructure', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyPrompt', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyPromptAs', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyPaths', noWorkspace),
+      vscode.commands.registerCommand('contexto.clearContext', noWorkspace),
+      vscode.commands.registerCommand('contexto.exportContext', noWorkspace),
+      vscode.commands.registerCommand('contexto.removeFile', noWorkspace),
+      vscode.commands.registerCommand('contexto.ignoreFile', noWorkspace),
+      vscode.commands.registerCommand('contexto.ignoreFolder', noWorkspace),
+      vscode.commands.registerCommand('contexto.removeFromIgnore', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyFolderStructure', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyWorkspaceStructure', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyFolderPaths', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyContext', noWorkspace),
+      vscode.commands.registerCommand('contexto.copyFolderContext', noWorkspace),
+      vscode.commands.registerCommand('contexto.refreshContext', noWorkspace),
     );
     return;
   }
@@ -80,7 +80,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     workspaceRoot
   );
 
-  const treeView = vscode.window.createTreeView('codeDigest.contextView', {
+  const treeView = vscode.window.createTreeView('contexto.contextView', {
     treeDataProvider: treeProvider,
     showCollapseAll: true,
   });
@@ -109,51 +109,51 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     statusBar,
 
     // Open sidebar
-    vscode.commands.registerCommand('codeDigest.open', () => {
-      vscode.commands.executeCommand('codeDigest.contextView.focus');
+    vscode.commands.registerCommand('contexto.open', () => {
+      vscode.commands.executeCommand('contexto.contextView.focus');
     }),
 
     // Add commands
-    vscode.commands.registerCommand('codeDigest.addFile', addFileToContext(cm)),
-    vscode.commands.registerCommand('codeDigest.addFolder', addFolderToContext(cm)),
-    vscode.commands.registerCommand('codeDigest.addActiveFile', addActiveFileToContext(cm)),
-    vscode.commands.registerCommand('codeDigest.addOpenEditors', addOpenEditorsToContext(cm)),
-    vscode.commands.registerCommand('codeDigest.addWorkspace', addWorkspaceToContext(cm)),
+    vscode.commands.registerCommand('contexto.addFile', addFileToContext(cm)),
+    vscode.commands.registerCommand('contexto.addFolder', addFolderToContext(cm)),
+    vscode.commands.registerCommand('contexto.addActiveFile', addActiveFileToContext(cm)),
+    vscode.commands.registerCommand('contexto.addOpenEditors', addOpenEditorsToContext(cm)),
+    vscode.commands.registerCommand('contexto.addWorkspace', addWorkspaceToContext(cm)),
 
     // Remove commands
-    vscode.commands.registerCommand('codeDigest.removeFile', removeFromContext(cm)),
-    vscode.commands.registerCommand('codeDigest.clearContext', clearContext(cm)),
+    vscode.commands.registerCommand('contexto.removeFile', removeFromContext(cm)),
+    vscode.commands.registerCommand('contexto.clearContext', clearContext(cm)),
 
     // Ignore commands
-    vscode.commands.registerCommand('codeDigest.ignoreFile', ignoreInContext(cm)),
-    vscode.commands.registerCommand('codeDigest.ignoreFolder', ignoreFolderInContext(cm)),
-    vscode.commands.registerCommand('codeDigest.removeFromIgnore', removeFromIgnore(cm)),
+    vscode.commands.registerCommand('contexto.ignoreFile', ignoreInContext(cm)),
+    vscode.commands.registerCommand('contexto.ignoreFolder', ignoreFolderInContext(cm)),
+    vscode.commands.registerCommand('contexto.removeFromIgnore', removeFromIgnore(cm)),
 
     // Generate & preview
-    vscode.commands.registerCommand('codeDigest.generatePrompt', generatePrompt(cm, extUri)),
+    vscode.commands.registerCommand('contexto.generatePrompt', generatePrompt(cm, extUri)),
 
     // Copy commands
-    vscode.commands.registerCommand('codeDigest.copyStructure', copyStructure(cm)),
-    vscode.commands.registerCommand('codeDigest.copyFolderStructure', copyFolderStructure(cm)),
-    vscode.commands.registerCommand('codeDigest.copyWorkspaceStructure', copyWorkspaceStructure(cm)),
-    vscode.commands.registerCommand('codeDigest.copyPrompt', copyPrompt(cm)),
-    vscode.commands.registerCommand('codeDigest.copyPromptAs', copyPromptAs(cm)),
-    vscode.commands.registerCommand('codeDigest.copyPaths', copyPaths(cm)),
-    vscode.commands.registerCommand('codeDigest.copyFolderPaths', copyFolderPaths(cm)),
-    vscode.commands.registerCommand('codeDigest.copyContext', copyContext(cm)),
-    vscode.commands.registerCommand('codeDigest.copyFolderContext', copyFolderContext(cm)),
+    vscode.commands.registerCommand('contexto.copyStructure', copyStructure(cm)),
+    vscode.commands.registerCommand('contexto.copyFolderStructure', copyFolderStructure(cm)),
+    vscode.commands.registerCommand('contexto.copyWorkspaceStructure', copyWorkspaceStructure(cm)),
+    vscode.commands.registerCommand('contexto.copyPrompt', copyPrompt(cm)),
+    vscode.commands.registerCommand('contexto.copyPromptAs', copyPromptAs(cm)),
+    vscode.commands.registerCommand('contexto.copyPaths', copyPaths(cm)),
+    vscode.commands.registerCommand('contexto.copyFolderPaths', copyFolderPaths(cm)),
+    vscode.commands.registerCommand('contexto.copyContext', copyContext(cm)),
+    vscode.commands.registerCommand('contexto.copyFolderContext', copyFolderContext(cm)),
 
     // Export
-    vscode.commands.registerCommand('codeDigest.exportContext', exportContext(cm)),
+    vscode.commands.registerCommand('contexto.exportContext', exportContext(cm)),
 
     // Refresh
-    vscode.commands.registerCommand('codeDigest.refreshContext', () => {
+    vscode.commands.registerCommand('contexto.refreshContext', () => {
       treeProvider.refresh();
     }),
 
     // Reload ignore engine on settings change
     vscode.workspace.onDidChangeConfiguration(async (e) => {
-      if (e.affectsConfiguration('codeDigest')) {
+      if (e.affectsConfiguration('contexto')) {
         if (!cm.suppressConfigReload) {
           await cm.reloadIgnoreEngine();
         }

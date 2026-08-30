@@ -1,31 +1,49 @@
 {
-  "name": "code-digest",
-  "displayName": "CodeDigest",
-  "description": "Convert workspace files into clean, AI-ready context. Local-first, lightweight, no AI APIs required.",
-  "version": "1.1.0",
-  "publisher": "codedigest",
+  "name": "contexto",
+  "displayName": "Contexto — AI Context & Prompt Generator",
+  "description": "Convert workspace files & codebase structure into clean, AI-ready prompts for Claude, ChatGPT, and local LLMs. 100% local, ultra-fast.",
+  "version": "1.1.4",
+  "publisher": "contexto",
+  "icon": "media/icon.png",
   "license": "MIT",
+  "homepage": "https://github.com/MYSELF-SAYAN/contexto#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/codedigest/code-digest"
+    "url": "https://github.com/MYSELF-SAYAN/contexto"
+  },
+  "bugs": {
+    "url": "https://github.com/MYSELF-SAYAN/contexto/issues"
+  },
+  "galleryBanner": {
+    "color": "#FBF7EE",
+    "theme": "light"
   },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
+    "AI",
+    "Programming Languages",
+    "Snippets",
     "Other"
   ],
   "keywords": [
     "context",
+    "contexto",
     "ai",
+    "claude",
+    "llm",
     "prompt",
-    "clipboard",
-    "structure",
+    "prompt-generator",
+    "prompt-engineering",
     "gitingest",
-    "files2prompt",
     "repomix",
-    "codedigest",
-    "code-digest"
+    "files2prompt",
+    "token-counter",
+    "codebase",
+    "chatgpt",
+    "deepseek",
+    "cursor"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -35,278 +53,278 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "codeDigest",
-          "title": "CodeDigest",
-          "icon": "$(file-code)"
+          "id": "contexto",
+          "title": "Contexto",
+          "icon": "media/activitybar-icon.svg"
         }
       ]
     },
     "views": {
-      "codeDigest": [
+      "contexto": [
         {
-          "id": "codeDigest.contextView",
+          "id": "contexto.contextView",
           "name": "Files"
         }
       ]
     },
     "commands": [
       {
-        "command": "codeDigest.open",
+        "command": "contexto.open",
         "title": "Open",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.addFile",
+        "command": "contexto.addFile",
         "title": "Add to Context",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(add)"
       },
       {
-        "command": "codeDigest.addFolder",
+        "command": "contexto.addFolder",
         "title": "Add Folder to Context",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(file-directory-create)"
       },
       {
-        "command": "codeDigest.addActiveFile",
+        "command": "contexto.addActiveFile",
         "title": "Add Active File",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(file-add)"
       },
       {
-        "command": "codeDigest.addOpenEditors",
+        "command": "contexto.addOpenEditors",
         "title": "Add Open Editors",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.addWorkspace",
+        "command": "contexto.addWorkspace",
         "title": "Select All Files",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(check-all)"
       },
       {
-        "command": "codeDigest.removeFile",
+        "command": "contexto.removeFile",
         "title": "Remove from Context",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(remove)"
       },
       {
-        "command": "codeDigest.ignoreFile",
+        "command": "contexto.ignoreFile",
         "title": "Ignore in Context",
-        "category": "CodeDigest",
-        "icon": "$(eye-closed)"
-      },
-      {
-        "command": "codeDigest.ignoreFolder",
-        "title": "Ignore Folder in Context",
-        "category": "CodeDigest",
-        "icon": "$(eye-closed)"
-      },
-      {
-        "command": "codeDigest.removeFromIgnore",
-        "title": "Unignore in Context",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(eye)"
       },
       {
-        "command": "codeDigest.generatePrompt",
+        "command": "contexto.ignoreFolder",
+        "title": "Ignore Folder in Context",
+        "category": "Contexto",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "contexto.removeFromIgnore",
+        "title": "Unignore in Context",
+        "category": "Contexto",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "contexto.generatePrompt",
         "title": "Generate Prompt / Live Preview",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(play)"
       },
       {
-        "command": "codeDigest.copyStructure",
+        "command": "contexto.copyStructure",
         "title": "Copy Structure",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(list-tree)"
       },
       {
-        "command": "codeDigest.copyFolderStructure",
+        "command": "contexto.copyFolderStructure",
         "title": "Copy Folder Structure",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.copyWorkspaceStructure",
+        "command": "contexto.copyWorkspaceStructure",
         "title": "Copy Workspace Structure",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.copyPrompt",
+        "command": "contexto.copyPrompt",
         "title": "Copy Prompt",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(copy)"
       },
       {
-        "command": "codeDigest.copyPromptAs",
+        "command": "contexto.copyPromptAs",
         "title": "Copy Prompt As...",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(chevron-down)"
       },
       {
-        "command": "codeDigest.copyPaths",
+        "command": "contexto.copyPaths",
         "title": "Copy Paths",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.copyFolderPaths",
+        "command": "contexto.copyFolderPaths",
         "title": "Copy Folder Paths",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.copyContext",
+        "command": "contexto.copyContext",
         "title": "Copy Context",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.copyFolderContext",
+        "command": "contexto.copyFolderContext",
         "title": "Copy Folder Context",
-        "category": "CodeDigest"
+        "category": "Contexto"
       },
       {
-        "command": "codeDigest.exportContext",
+        "command": "contexto.exportContext",
         "title": "Export",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(save)"
       },
       {
-        "command": "codeDigest.clearContext",
+        "command": "contexto.clearContext",
         "title": "Clear / Unselect All",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(clear-all)"
       },
       {
-        "command": "codeDigest.refreshContext",
+        "command": "contexto.refreshContext",
         "title": "Refresh",
-        "category": "CodeDigest",
+        "category": "Contexto",
         "icon": "$(refresh)"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "codeDigest.addFile",
+          "command": "contexto.addFile",
           "when": "!explorerResourceIsFolder",
-          "group": "codeDigest@1"
+          "group": "contexto@1"
         },
         {
-          "command": "codeDigest.addFolder",
+          "command": "contexto.addFolder",
           "when": "explorerResourceIsFolder",
-          "group": "codeDigest@1"
+          "group": "contexto@1"
         },
         {
-          "command": "codeDigest.copyContext",
+          "command": "contexto.copyContext",
           "when": "!explorerResourceIsFolder",
-          "group": "codeDigest@2"
+          "group": "contexto@2"
         },
         {
-          "command": "codeDigest.copyFolderContext",
+          "command": "contexto.copyFolderContext",
           "when": "explorerResourceIsFolder",
-          "group": "codeDigest@2"
+          "group": "contexto@2"
         },
         {
-          "command": "codeDigest.copyFolderStructure",
+          "command": "contexto.copyFolderStructure",
           "when": "explorerResourceIsFolder",
-          "group": "codeDigest@3"
+          "group": "contexto@3"
         },
         {
-          "command": "codeDigest.copyStructure",
+          "command": "contexto.copyStructure",
           "when": "!explorerResourceIsFolder",
-          "group": "codeDigest@3"
+          "group": "contexto@3"
         },
         {
-          "command": "codeDigest.copyPaths",
+          "command": "contexto.copyPaths",
           "when": "!explorerResourceIsFolder",
-          "group": "codeDigest@4"
+          "group": "contexto@4"
         },
         {
-          "command": "codeDigest.copyFolderPaths",
+          "command": "contexto.copyFolderPaths",
           "when": "explorerResourceIsFolder",
-          "group": "codeDigest@4"
+          "group": "contexto@4"
         },
         {
-          "command": "codeDigest.ignoreFile",
+          "command": "contexto.ignoreFile",
           "when": "!explorerResourceIsFolder",
-          "group": "codeDigest@5"
+          "group": "contexto@5"
         },
         {
-          "command": "codeDigest.ignoreFolder",
+          "command": "contexto.ignoreFolder",
           "when": "explorerResourceIsFolder",
-          "group": "codeDigest@5"
+          "group": "contexto@5"
         },
         {
-          "command": "codeDigest.removeFromIgnore",
-          "group": "codeDigest@5"
+          "command": "contexto.removeFromIgnore",
+          "group": "contexto@5"
         }
       ],
       "view/title": [
         {
-          "command": "codeDigest.generatePrompt",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.generatePrompt",
+          "when": "view == contexto.contextView",
           "group": "navigation@1"
         },
         {
-          "command": "codeDigest.copyPrompt",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.copyPrompt",
+          "when": "view == contexto.contextView",
           "group": "navigation@2"
         },
         {
-          "command": "codeDigest.copyPromptAs",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.copyPromptAs",
+          "when": "view == contexto.contextView",
           "group": "navigation@3"
         },
         {
-          "command": "codeDigest.copyStructure",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.copyStructure",
+          "when": "view == contexto.contextView",
           "group": "navigation@4"
         },
         {
-          "command": "codeDigest.addWorkspace",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.addWorkspace",
+          "when": "view == contexto.contextView",
           "group": "navigation@5"
         },
         {
-          "command": "codeDigest.clearContext",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.clearContext",
+          "when": "view == contexto.contextView",
           "group": "navigation@6"
         },
         {
-          "command": "codeDigest.refreshContext",
-          "when": "view == codeDigest.contextView",
+          "command": "contexto.refreshContext",
+          "when": "view == contexto.contextView",
           "group": "navigation@7"
         }
       ],
       "view/item/context": [
         {
-          "command": "codeDigest.ignoreFile",
-          "when": "view == codeDigest.contextView && viewItem == contextFile",
+          "command": "contexto.ignoreFile",
+          "when": "view == contexto.contextView && viewItem == contextFile",
           "group": "inline"
         },
         {
-          "command": "codeDigest.ignoreFolder",
-          "when": "view == codeDigest.contextView && viewItem == contextFolder",
+          "command": "contexto.ignoreFolder",
+          "when": "view == contexto.contextView && viewItem == contextFolder",
           "group": "inline"
         },
         {
-          "command": "codeDigest.removeFromIgnore",
-          "when": "view == codeDigest.contextView && (viewItem == contextIgnoredFile || viewItem == contextIgnoredFolder)",
+          "command": "contexto.removeFromIgnore",
+          "when": "view == contexto.contextView && (viewItem == contextIgnoredFile || viewItem == contextIgnoredFolder)",
           "group": "inline"
         }
       ]
     },
     "configuration": {
-      "title": "CodeDigest",
+      "title": "Contexto",
       "properties": {
-        "codeDigest.respectGitignore": {
+        "contexto.respectGitignore": {
           "type": "boolean",
           "default": true,
           "description": "Respect .gitignore patterns when scanning files."
         },
-        "codeDigest.useContextignore": {
+        "contexto.useContextignore": {
           "type": "boolean",
           "default": true,
           "description": "Respect .contextignore file for context-specific ignore patterns."
         },
-        "codeDigest.ignore": {
+        "contexto.ignore": {
           "type": "array",
           "items": {
             "type": "string"
@@ -314,7 +332,7 @@
           "default": [],
           "description": "Custom glob patterns to ignore when building context."
         },
-        "codeDigest.explicitIncludes": {
+        "contexto.explicitIncludes": {
           "type": "array",
           "items": {
             "type": "string"
@@ -322,7 +340,7 @@
           "default": [],
           "description": "Paths explicitly included — overrides all ignore rules (gitignore, contextignore, defaults, user patterns). Managed automatically via the Unignore command."
         },
-        "codeDigest.defaultFormat": {
+        "contexto.defaultFormat": {
           "type": "string",
           "enum": [
             "xml",
@@ -332,27 +350,27 @@
           "default": "xml",
           "description": "Default output format for generated context."
         },
-        "codeDigest.maxFileSize": {
+        "contexto.maxFileSize": {
           "type": "number",
           "default": 1048576,
           "description": "Maximum file size in bytes to include in context (default: 1 MB)."
         },
-        "codeDigest.includeTree": {
+        "contexto.includeTree": {
           "type": "boolean",
           "default": true,
           "description": "Include directory tree in generated context."
         },
-        "codeDigest.includeFileContents": {
+        "contexto.includeFileContents": {
           "type": "boolean",
           "default": true,
           "description": "Include file contents in generated context."
         },
-        "codeDigest.includeEmptyLines": {
+        "contexto.includeEmptyLines": {
           "type": "boolean",
           "default": true,
           "description": "Preserve empty lines in file contents."
         },
-        "codeDigest.treeDepth": {
+        "contexto.treeDepth": {
           "type": "number",
           "default": 0,
           "description": "Maximum depth for tree structure (0 = unlimited)."
