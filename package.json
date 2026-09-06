@@ -2,7 +2,7 @@
   "name": "contexto",
   "displayName": "Contexto — AI Context & Prompt Generator",
   "description": "Convert workspace files & codebase structure into clean, AI-ready prompts for Claude, ChatGPT, and local LLMs. 100% local, ultra-fast.",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "publisher": "contexto",
   "icon": "media/icon.png",
   "license": "MIT",
